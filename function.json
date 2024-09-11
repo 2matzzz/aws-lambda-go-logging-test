@@ -1,0 +1,19 @@
+{
+    "Architectures": [
+        "arm64"
+    ],
+    "Description": "test",
+    "FunctionName": "go-runtime-logging-test",
+    "Handler": "bootstrap",
+    "MemorySize": 128,
+    "PackageType": "Zip",
+    "Publish": true,
+    "Role": "{{ must_env `LAMBDA_ROLE` }}",
+    "Runtime": "provided.al2023",
+    "Timeout": 15,
+    "LoggingConfig": {
+        "ApplicationLogLevel" : "TRACE",
+        "LogFormat" : "JSON",
+        "SystemLogLevel" : "DEBUG"
+    }
+}
