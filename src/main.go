@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/sirupsen/logrus"
@@ -11,6 +13,7 @@ import (
 func handler(ctx context.Context) {
 	input, _ := json.Marshal(&ctx)
 	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetLevel(logrus.TraceLevel)
 
 	logrus.WithFields(logrus.Fields{
 		"input": string(input),
@@ -21,6 +24,12 @@ func handler(ctx context.Context) {
 	logrus.WithFields(logrus.Fields{
 		"input": string(input),
 	}).Info("info")
+	logrus.WithFields(logrus.Fields{
+		"input": string(input),
+	}).Warn("warn")
+	logrus.WithFields(logrus.Fields{
+		"input": string(input),
+	}).Error("error")
 
 	input = append(input, '}')
 
@@ -31,10 +40,33 @@ func handler(ctx context.Context) {
 			"input": string(input),
 			"error": err,
 		}).Error("input json unmarshal error")
-		return
 	}
 
-	// fmt.Fprintf(os.Stderr, "context: %s", string(json))
+	// The following 5 entries are valid, and the output to CloudWatch logs depends on the application's log level in Lambda config.
+	fmt.Fprintf(os.Stderr, `{"msg":"mylog","out":"stderr","level":"%s"}`+"\n", logrus.TraceLevel.String())
+	fmt.Fprintf(os.Stderr, `{"msg":"mylog","out":"stderr","level":"%s"}`+"\n", logrus.DebugLevel.String())
+	fmt.Fprintf(os.Stderr, `{"msg":"mylog","out":"stderr","level":"%s"}`+"\n", logrus.InfoLevel.String())
+	fmt.Fprintf(os.Stderr, `{"msg":"mylog","out":"stderr","level":"%s"}`+"\n", logrus.WarnLevel.String())
+	fmt.Fprintf(os.Stderr, `{"msg":"mylog","out":"stderr","level":"%s"}`+"\n", logrus.ErrorLevel.String())
+
+	// The following 5 entries are valid, and the output to CloudWatch logs depends on the application's log level in Lambda config.
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"%s"}`+"\n", logrus.TraceLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"%s"}`+"\n", logrus.DebugLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"%s"}`+"\n", logrus.InfoLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"%s"}`+"\n", logrus.WarnLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"%s"}`+"\n", logrus.ErrorLevel.String())
+
+	// The following 5 entries are invalid
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","Level":"%s"}`+"\n", logrus.ErrorLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","LEVEL":"%s"}`+"\n", logrus.ErrorLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","logLevel":"%s"}`+"\n", logrus.ErrorLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","log-level":"%s"}`+"\n", logrus.ErrorLevel.String())
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","log_level":"%s"}`+"\n", logrus.ErrorLevel.String())
+
+	// The following first 2 entries are valid
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"ERROR"}`+"\n")
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"Error"}`+"\n")
+	fmt.Fprintf(os.Stdout, `{"msg":"mylog","out":"stdout","level":"eRROr"}`+"\n")
 }
 
 func main() {

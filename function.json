@@ -12,8 +12,8 @@
     "Runtime": "provided.al2023",
     "Timeout": 15,
     "LoggingConfig": {
-        "ApplicationLogLevel" : "TRACE",
+        "ApplicationLogLevel" : "ERROR",
         "LogFormat" : "JSON",
-        "SystemLogLevel" : "DEBUG"
+        "SystemLogLevel" : "WARN"
     }
 }

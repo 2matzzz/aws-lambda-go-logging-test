@@ -1,0 +1,7 @@
+# Logging Test for AWS Lambda provided.al2023 Runtime
+
+This repository contains test code to examine how the provided.al2023 runtime handles logs.
+
+The test results revealed that the value of the `level` key in JSON-formatted logs is treated as the log level. 
+
+Valid values for this key are either `error`, `Error`, or `ERROR`.
