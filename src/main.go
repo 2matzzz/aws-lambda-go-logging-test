@@ -12,8 +12,20 @@ import (
 
 func handler(ctx context.Context) {
 	input, _ := json.Marshal(&ctx)
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetLevel(logrus.TraceLevel)
+
+	if os.Getenv("AWS_LAMBDA_LOG_FORMAT") == "JSON" {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	}
+
+	logLevel := os.Getenv("AWS_LAMBDA_LOG_LEVEL")
+	level, err := logrus.ParseLevel(logLevel)
+	if err != nil {
+		logrus.WithField("error", err.Error()).Fatal("log level configuration error")
+	}
+	logrus.SetLevel(level)
+
+	logrus.WithField("AWS_LAMBDA_LOG_FORMAT", os.Getenv("AWS_LAMBDA_LOG_FORMAT")).Info()
+	logrus.WithField("AWS_LAMBDA_LOG_LEVEL", os.Getenv("AWS_LAMBDA_LOG_LEVEL")).Info()
 
 	logrus.WithFields(logrus.Fields{
 		"input": string(input),
@@ -34,7 +46,7 @@ func handler(ctx context.Context) {
 	input = append(input, '}')
 
 	var m map[string]interface{}
-	err := json.Unmarshal(input, &m)
+	err = json.Unmarshal(input, &m)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"input": string(input),
